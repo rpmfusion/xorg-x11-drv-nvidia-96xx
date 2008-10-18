@@ -8,7 +8,7 @@
 
 Name:          xorg-x11-drv-nvidia-96xx
 Version:       96.43.07
-Release:       2%{?dist}
+Release:       3%{?dist}
 Summary:       NVIDIA's 96xx series proprietary display driver for NVIDIA graphic cards
 
 Group:         User Interface/X Hardware Support
@@ -72,7 +72,7 @@ for driver version %{version}.
 %package devel
 Summary:       Development files for %{name}
 Group:         Development/Libraries
-Requires:      %{name} = %{version}-%{release}
+Requires:      %{name}-libs = %{version}-%{release}
 
 %description devel
 This package provides the development files of the %{name} package,
@@ -289,6 +289,10 @@ fi
 
 
 %changelog
+* Sat Oct 18 2008 Stewart Adam <s.adam at diffingo.com> - 96.43.07-3
+- Change dependency of main package to libs subpackage in devel subpackage to
+  fix multiarch repo push
+
 * Sun Oct 05 2008 Thorsten Leemhuis <fedora [AT] leemhuis [DOT] info - 96.43.07-2
 - rebuild for rpm fusion
 
