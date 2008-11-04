@@ -8,7 +8,7 @@
 
 Name:            xorg-x11-drv-nvidia-96xx
 Version:         96.43.07
-Release:         4%{?dist}
+Release:         6%{?dist}
 Summary:         NVIDIA's 96xx series proprietary display driver for NVIDIA graphic cards
 
 Group:           User Interface/X Hardware Support
@@ -59,6 +59,9 @@ Conflicts:       xorg-x11-drv-fglrx
 
 Obsoletes:       nvidia-96xx-kmod < %{version}
 
+Obsoletes:       nvidia-x11-drv-96xx < %{version}-%{release}
+Provides:        nvidia-x11-drv-96xx = %{version}-%{release}
+
 %description
 This package provides the most recent NVIDIA display driver of the 1.0-96xx
 series which allows for hardware accelerated rendering with NVIDIA chipsets
@@ -81,6 +84,7 @@ such as OpenGL headers.
 %package libs
 Summary:         Libraries for %{name}
 Group:           User Interface/X Hardware Support
+Requires:        %{name} = %{version}-%{release}
 %ifarch %{ix86}
 Provides:        %{name}-libs-32bit = %{version}-%{release}
 Obsoletes:       %{name}-libs-32bit <= %{version}-%{release}
@@ -288,6 +292,12 @@ fi
 
 
 %changelog
+* Tue Nov 4 2008 Stewart Adam <s.adam at diffingo.com> - 96.43.07-6
+- Fix upgrade path for FreshRPMs users
+
+* Mon Oct 27 2008 Stewart Adam <s.adam at diffingo.com> - 96.43.07-5
+- Revert the libs dep change
+
 * Sat Oct 25 2008 Stewart Adam <s.adam at diffingo.com> - 96.43.07-4
 - Remove the libs subpackage's dependency on main package
 
