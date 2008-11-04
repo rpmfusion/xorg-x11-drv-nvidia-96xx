@@ -6,60 +6,63 @@
 %{nil}
 %endif
 
-Name:          xorg-x11-drv-nvidia-96xx
-Version:       96.43.09
-Release:       1%{?dist}
-Summary:       NVIDIA's 96xx series proprietary display driver for NVIDIA graphic cards
+Name:            xorg-x11-drv-nvidia-96xx
+Version:         96.43.09
+Release:         2%{?dist}
+Summary:         NVIDIA's 96xx series proprietary display driver for NVIDIA graphic cards
 
-Group:         User Interface/X Hardware Support
-License:       Redistributable, no modification permitted
-URL:           http://www.nvidia.com/
-#Source0:       http://us.download.nvidia.com/XFree86/Linux-x86/%{version}/NVIDIA-Linux-x86-%{version}-pkg0.run
-#Source1:       http://us.download.nvidia.com/XFree86/Linux-x86_64/%{version}/NVIDIA-Linux-x86_64-%{version}-pkg0.run
-Source0:       ftp://download.nvidia.com/XFree86/Linux-x86/%{version}/NVIDIA-Linux-x86-%{version}-pkg0.run
-Source1:       ftp://download.nvidia.com/XFree86/Linux-x86_64/%{version}/NVIDIA-Linux-x86_64-%{version}-pkg0.run
-Source2:       nvidia-96xx.sh
-Source3:       nvidia-96xx.csh
-Source4:       nvidia-settings.desktop
-Source5:       nvidia-96xx-init
-Source6:       60-nvidia.nodes
-Source10:      nvidia-96xx-config-display
-Source11:      nvidia-96xx-README.Fedora
-Source12:      nvidia-96xx.opts
+Group:           User Interface/X Hardware Support
+License:         Redistributable, no modification permitted
+URL:             http://www.nvidia.com/
+#Source0:         http://us.download.nvidia.com/XFree86/Linux-x86/%{version}/NVIDIA-Linux-x86-%{version}-pkg0.run
+#Source1:         http://us.download.nvidia.com/XFree86/Linux-x86_64/%{version}/NVIDIA-Linux-x86_64-%{version}-pkg0.run
+Source0:         ftp://download.nvidia.com/XFree86/Linux-x86/%{version}/NVIDIA-Linux-x86-%{version}-pkg0.run
+Source1:         ftp://download.nvidia.com/XFree86/Linux-x86_64/%{version}/NVIDIA-Linux-x86_64-%{version}-pkg0.run
+Source2:         nvidia-96xx.sh
+Source3:         nvidia-96xx.csh
+Source4:         nvidia-settings.desktop
+Source5:         nvidia-96xx-init
+Source6:         60-nvidia.nodes
+Source10:        nvidia-96xx-config-display
+Source11:        nvidia-96xx-README.Fedora
+Source12:        nvidia-96xx.opts
 # So we don't pull other nvidia variants
-Source91:  filter-requires.sh
-%define    _use_internal_dependency_generator 0
-%define    __find_requires %{SOURCE91}
+Source91:        filter-requires.sh
+%define          _use_internal_dependency_generator 0
+%define          __find_requires %{SOURCE91}
 
-BuildRoot:     %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-ExclusiveArch: i386 x86_64
+BuildRoot:       %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+ExclusiveArch:   i386 x86_64
 
-Requires:      nvidia-96xx-kmod >= %{version}
+Requires:        nvidia-96xx-kmod >= %{version}
 Requires(post):  nvidia-96xx-kmod >= %{version}
 
 # Needed in all nvidia or fglrx driver packages
-BuildRequires:      desktop-file-utils
-Requires:           which
-Requires:           livna-config-display
-Requires:           %{name}-libs-%{_target_cpu} = %{version}-%{release}
+BuildRequires:   desktop-file-utils
+Requires:        which
+Requires:        livna-config-display
+Requires:        %{name}-libs-%{_target_cpu} = %{version}-%{release}
 
-Requires(post):     livna-config-display
-Requires(preun):    livna-config-display
-Requires(post):     chkconfig
-Requires(post):     ldconfig
-Requires(preun):    chkconfig
+Requires(post):  livna-config-display
+Requires(preun): livna-config-display
+Requires(post):  chkconfig
+Requires(post):  ldconfig
+Requires(preun): chkconfig
 
-Provides:      nvidia-96xx-kmod-common = %{version}
+Provides:        nvidia-96xx-kmod-common = %{version}
 
-Conflicts:     xorg-x11-drv-nvidia-legacy
-Conflicts:     xorg-x11-drv-nvidia-beta
-Conflicts:     xorg-x11-drv-nvidia-newest
-Conflicts:     xorg-x11-drv-nvidia-173xx
-Conflicts:     xorg-x11-drv-nvidia-71xx
-Conflicts:     xorg-x11-drv-nvidia
-Conflicts:     xorg-x11-drv-fglrx
+Conflicts:       xorg-x11-drv-nvidia-legacy
+Conflicts:       xorg-x11-drv-nvidia-beta
+Conflicts:       xorg-x11-drv-nvidia-newest
+Conflicts:       xorg-x11-drv-nvidia-173xx
+Conflicts:       xorg-x11-drv-nvidia-71xx
+Conflicts:       xorg-x11-drv-nvidia
+Conflicts:       xorg-x11-drv-fglrx
 
-Obsoletes:     nvidia-96xx-kmod < %{version}
+Obsoletes:       nvidia-96xx-kmod < %{version}
+
+Obsoletes:       nvidia-x11-drv-96xx < %{version}-%{release}
+Provides:        nvidia-x11-drv-96xx = %{version}-%{release}
 
 %description
 This package provides the most recent NVIDIA display driver of the 1.0-96xx
@@ -72,22 +75,22 @@ for driver version %{version}.
 
 
 %package devel
-Summary:       Development files for %{name}
-Group:         Development/Libraries
-Requires:      %{name} = %{version}-%{release}
+Summary:         Development files for %{name}
+Group:           Development/Libraries
+Requires:        %{name} = %{version}-%{release}
 
 %description devel
 This package provides the development files of the %{name} package,
 such as OpenGL headers.
 
 %package libs
-Summary:       Libraries for %{name}
-Group:         User Interface/X Hardware Support
-Requires:      %{name} = %{version}-%{release}
-Provides:      %{name}-libs-%{_target_cpu} = %{version}-%{release}
+Summary:         Libraries for %{name}
+Group:           User Interface/X Hardware Support
+Requires:        %{name} = %{version}-%{release}
+Provides:        %{name}-libs-%{_target_cpu} = %{version}-%{release}
 %ifarch %{ix86}
-Provides: %{name}-libs-32bit = %{version}-%{release}
-Obsoletes: %{name}-libs-32bit <= %{version}-%{release}
+Provides:        %{name}-libs-32bit = %{version}-%{release}
+Obsoletes:       %{name}-libs-32bit <= %{version}-%{release}
 %endif
 
 %description libs
@@ -292,6 +295,9 @@ fi
 
 
 %changelog
+* Tue Nov 4 2008 Stewart Adam <s.adam at diffingo.com> - 96.43.09-2
+- Fix upgrade path for FreshRPMs users
+
 * Thu Oct 30 2008 kwizart < kwizart at gmail.com > - 96.43.09-1
 - Update to 96.43.09 (beta)
   Preliminary support for xorg-server 1.5
