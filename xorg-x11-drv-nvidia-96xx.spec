@@ -8,24 +8,18 @@
 
 Name:            xorg-x11-drv-nvidia-96xx
 Version:         96.43.09
-Release:         2%{?dist}
+Release:         3%{?dist}
 Summary:         NVIDIA's 96xx series proprietary display driver for NVIDIA graphic cards
 
 Group:           User Interface/X Hardware Support
 License:         Redistributable, no modification permitted
 URL:             http://www.nvidia.com/
-#Source0:         http://us.download.nvidia.com/XFree86/Linux-x86/%{version}/NVIDIA-Linux-x86-%{version}-pkg0.run
-#Source1:         http://us.download.nvidia.com/XFree86/Linux-x86_64/%{version}/NVIDIA-Linux-x86_64-%{version}-pkg0.run
 Source0:         ftp://download.nvidia.com/XFree86/Linux-x86/%{version}/NVIDIA-Linux-x86-%{version}-pkg0.run
 Source1:         ftp://download.nvidia.com/XFree86/Linux-x86_64/%{version}/NVIDIA-Linux-x86_64-%{version}-pkg0.run
-Source2:         nvidia-96xx.sh
-Source3:         nvidia-96xx.csh
 Source4:         nvidia-settings.desktop
 Source5:         nvidia-96xx-init
-Source6:         60-nvidia.nodes
 Source10:        nvidia-96xx-config-display
 Source11:        nvidia-96xx-README.Fedora
-Source12:        nvidia-96xx.opts
 # So we don't pull other nvidia variants
 Source91:        filter-requires.sh
 %define          _use_internal_dependency_generator 0
@@ -65,10 +59,10 @@ Obsoletes:       nvidia-x11-drv-96xx < %{version}-%{release}
 Provides:        nvidia-x11-drv-96xx = %{version}-%{release}
 
 %description
-This package provides the most recent NVIDIA display driver of the 1.0-96xx
-series which allows for hardware accelerated rendering with NVIDIA chipsets
-NV11 (GeForce 2) to G71 (GeForce 7950). G80 (GeForce 8800) and above are NOT
-supported by this release.
+This package provides the legacy NVIDIA display driver of the 96xx serie
+which allows for hardware accelerated rendering with NVIDIA chipsets
+Legacy releases for GeForce 2 through GeForce 4 series GPUs.
+GeForce 8 and above are NOT supported by this release.
 
 For the full product support list, please consult the release notes
 for driver version %{version}.
@@ -186,10 +180,6 @@ ln -s libXvMCNVIDIA.so.%{version} $RPM_BUILD_ROOT%{nvidialibdir}/libXvMCNVIDIA.s
 ln -s libXvMCNVIDIA.so.%{version} $RPM_BUILD_ROOT%{nvidialibdir}/libXvMCNVIDIA_dynamic.so.1
 ln -s libglx.so.%{version} $RPM_BUILD_ROOT%{_libdir}/xorg/modules/extensions/nvidia/libglx.so
 
-# profile.d files
-install -D -p -m 0755 %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/nvidia-96xx.sh
-install -D -p -m 0755 %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/nvidia-96xx.csh
-
 # X configuration script
 install -D -p -m 0755 %{SOURCE10} $RPM_BUILD_ROOT%{_sbindir}/nvidia-96xx-config-display
 
@@ -200,12 +190,6 @@ desktop-file-install --vendor livna \
 
 # Install initscript
 install -D -p -m 0755 %{SOURCE5} $RPM_BUILD_ROOT%{_initrddir}/nvidia-96xx
-
-# modprobe.d file
-install -D -p -m 0644 %{SOURCE12} $RPM_BUILD_ROOT%{_sysconfdir}/modprobe.d/nvidia-96xx
-
-# udev node file
-install -D -p -m 0664 %{SOURCE6} $RPM_BUILD_ROOT%{_sysconfdir}/udev/makedev.d/60-nvidia.nodes
 
 # ld.so.conf.d file
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/ld.so.conf.d/
@@ -237,29 +221,12 @@ if [ "$1" -eq "0" ]; then
     %{_initrddir}/nvidia-96xx stop &>/dev/null ||:
     /sbin/chkconfig --del nvidia-96xx ||:
 fi ||:
-# Remove all entries of nvidia/NV driver from modprobe.conf
-# Start using modprobe.d as of FC5
-# This can be removed eventually
-# Make a backup of the backup
-if [ -f %{_sysconfdir}/modprobe.conf.backup-nvidia-glx ]; then
-  mv %{_sysconfdir}/modprobe.conf.backup-nvidia-glx %{_sysconfdir}/modprobe.conf.backup-nvidia  ||:
-fi
-if [ -f %{_sysconfdir}/modprobe.conf.backup-nvidia ]; then
-  mv %{_sysconfdir}/modprobe.conf.backup-nvidia %{_sysconfdir}/modprobe.conf.backup-nvidia-old  ||:
-fi
-if [ -f %{_sysconfdir}/modprobe.conf ];then
-  mv %{_sysconfdir}/modprobe.conf %{_sysconfdir}/modprobe.conf.backup-nvidia-96xx ||:
-  grep -v -E -e "^alias +[^ ]+ +(nvidia|NVdriver)" -e "options nvidia " %{_sysconfdir}/modprobe.conf.backup-nvidia-96xx > %{_sysconfdir}/modprobe.conf  ||:
-fi
 
 %postun libs -p /sbin/ldconfig
 
 %files
 %defattr(-,root,root,-)
 %doc nvidiapkg/usr/share/doc/*
-%config(noreplace) %{_sysconfdir}/profile.d/nvidia-96xx*
-%config %{_sysconfdir}/modprobe.d/nvidia-96xx
-%{_sysconfdir}/udev/makedev.d/60-nvidia.nodes
 %{_initrddir}/nvidia-96xx
 %{_bindir}/*
 %{_sbindir}/*
@@ -271,11 +238,6 @@ fi
 %{_datadir}/applications/*nvidia-settings.desktop
 %{_datadir}/pixmaps/*.png
 %{_mandir}/man[1-9]/nvidia*.*
-%verify (not user) %attr(0600,root,root) %dev(c,195,0) /dev/nvidia0
-%verify (not user) %attr(0600,root,root) %dev(c,195,1) /dev/nvidia1
-%verify (not user) %attr(0600,root,root) %dev(c,195,2) /dev/nvidia2
-%verify (not user) %attr(0600,root,root) %dev(c,195,3) /dev/nvidia3
-%verify (not user) %attr(0600,root,root) %dev(c,195,255) /dev/nvidiactl
 
 %files libs
 %defattr(-,root,root,-)
@@ -295,6 +257,9 @@ fi
 
 
 %changelog
+* Mon Nov 10 2008 kwizart < kwizart at gmail.com > - 96.43.09-3
+- Clean the spec.
+
 * Tue Nov 4 2008 Stewart Adam <s.adam at diffingo.com> - 96.43.09-2
 - Fix upgrade path for FreshRPMs users
 
