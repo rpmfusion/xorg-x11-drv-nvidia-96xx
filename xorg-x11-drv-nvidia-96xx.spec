@@ -7,8 +7,8 @@
 %endif
 
 Name:            xorg-x11-drv-nvidia-96xx
-Version:         96.43.09
-Release:         4%{?dist}
+Version:         96.43.11
+Release:         1%{?dist}
 Summary:         NVIDIA's 96xx series proprietary display driver for NVIDIA graphic cards
 
 Group:           User Interface/X Hardware Support
@@ -257,6 +257,9 @@ fi ||:
 
 
 %changelog
+* Wed Feb 25 2009 kwizart < kwizart at gmail.com > - 96.43.11-1
+- Update to 96.43.11 (stable)
+
 * Sun Feb 22 2009 Stewart Adam <s.adam at diffingo.com> - 96.43.09-4
 - Make devel subpackage depend on lib subpackage of the same arch
 
