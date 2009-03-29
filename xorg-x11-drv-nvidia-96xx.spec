@@ -8,7 +8,7 @@
 
 Name:            xorg-x11-drv-nvidia-96xx
 Version:         96.43.11
-Release:         1%{?dist}
+Release:         2%{?dist}
 Summary:         NVIDIA's 96xx series proprietary display driver for NVIDIA graphic cards
 
 Group:           User Interface/X Hardware Support
@@ -257,6 +257,9 @@ fi ||:
 
 
 %changelog
+* Sun Mar 29 2009 Thorsten Leemhuis <fedora [AT] leemhuis [DOT] info> - 96.43.11-2
+- rebuild for new F11 features
+
 * Wed Feb 25 2009 kwizart < kwizart at gmail.com > - 96.43.11-1
 - Update to 96.43.11 (stable)
 
