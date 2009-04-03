@@ -8,7 +8,7 @@
 
 Name:            xorg-x11-drv-nvidia-96xx
 Version:         96.43.11
-Release:         2%{?dist}
+Release:         3%{?dist}
 Summary:         NVIDIA's 96xx series proprietary display driver for NVIDIA graphic cards
 
 Group:           User Interface/X Hardware Support
@@ -26,7 +26,11 @@ Source91:        filter-requires.sh
 %define          __find_requires %{SOURCE91}
 
 BuildRoot:       %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-ExclusiveArch:   i386 x86_64
+%if 0%{?fedora} >= 11
+ExclusiveArch: i586 x86_64
+%else
+ExclusiveArch: i386 x86_64
+%endif
 
 Requires:        nvidia-96xx-kmod >= %{version}
 Requires(post):  nvidia-96xx-kmod >= %{version}
@@ -257,17 +261,17 @@ fi ||:
 
 
 %changelog
+* Fri Apr  3 2009 kwizart < kwizart at gmail.com > - 96.43.11-3
+- Fix x86 Arch for fedora >= 11
+
 * Sun Mar 29 2009 Thorsten Leemhuis <fedora [AT] leemhuis [DOT] info> - 96.43.11-2
 - rebuild for new F11 features
 
 * Wed Feb 25 2009 kwizart < kwizart at gmail.com > - 96.43.11-1
 - Update to 96.43.11 (stable)
 
-* Sun Feb 22 2009 Stewart Adam <s.adam at diffingo.com> - 96.43.10-2
+* Sun Feb 22 2009 Stewart Adam <s.adam at diffingo.com> - 96.43.09-4
 - Make devel subpackage depend on lib subpackage of the same arch
-
-* Thu Jan 29 2009 kwizart < kwizart at gmail.com > - 96.43.10-1
-- Update to 96.43.10 (beta)
 
 * Mon Nov 10 2008 kwizart < kwizart at gmail.com > - 96.43.09-3
 - Clean the spec.
