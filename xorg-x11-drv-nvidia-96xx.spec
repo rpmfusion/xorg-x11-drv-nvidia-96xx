@@ -8,7 +8,7 @@
 
 Name:            xorg-x11-drv-nvidia-96xx
 Version:         96.43.11
-Release:         3%{?dist}
+Release:         4%{?dist}
 Summary:         NVIDIA's 96xx series proprietary display driver for NVIDIA graphic cards
 
 Group:           User Interface/X Hardware Support
@@ -18,6 +18,7 @@ Source0:         ftp://download.nvidia.com/XFree86/Linux-x86/%{version}/NVIDIA-L
 Source1:         ftp://download.nvidia.com/XFree86/Linux-x86_64/%{version}/NVIDIA-Linux-x86_64-%{version}-pkg0.run
 Source4:         nvidia-settings.desktop
 Source5:         nvidia-96xx-init
+Source6:         blacklist-nouveau.conf
 Source10:        nvidia-96xx-config-display
 Source11:        nvidia-96xx-README.Fedora
 # So we don't pull other nvidia variants
@@ -195,6 +196,10 @@ desktop-file-install --vendor livna \
 # Install initscript
 install -D -p -m 0755 %{SOURCE5} $RPM_BUILD_ROOT%{_initrddir}/nvidia-96xx
 
+#Blacklist nouveau by F-11
+mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/modprobe.d/
+install -pm 0644 %{SOURCE6} $RPM_BUILD_ROOT%{_sysconfdir}/modprobe.d/
+
 # ld.so.conf.d file
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/ld.so.conf.d/
 echo "%{nvidialibdir}" > $RPM_BUILD_ROOT%{_sysconfdir}/ld.so.conf.d/nvidia-96xx-%{_lib}.conf
@@ -261,6 +266,9 @@ fi ||:
 
 
 %changelog
+* Sun Jun  7 2009 kwizart < kwizart at gmail.com > - 96.43.11-4
+- blacklist nouveau by default.
+
 * Fri Apr  3 2009 kwizart < kwizart at gmail.com > - 96.43.11-3
 - Fix x86 Arch for fedora >= 11
 
