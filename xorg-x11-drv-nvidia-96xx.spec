@@ -236,6 +236,7 @@ fi ||:
 %files
 %defattr(-,root,root,-)
 %doc nvidiapkg/usr/share/doc/*
+%config(noreplace) %{_sysconfdir}/modprobe.d/blacklist-nouveau.conf
 %{_initrddir}/nvidia-96xx
 %{_bindir}/*
 %{_sbindir}/*
