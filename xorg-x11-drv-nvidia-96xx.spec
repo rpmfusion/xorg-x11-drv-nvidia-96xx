@@ -1,14 +1,14 @@
 %define        nvidialibdir      %{_libdir}/nvidia
 
 # Tweak to have debuginfo - part 1/2
-%if "%fedora" > "7"
+%if 0%{?fedora} >= 7
 %define __debug_install_post %{_builddir}/%{?buildsubdir}/find-debuginfo.sh %{_builddir}/%{?buildsubdir}\
 %{nil}
 %endif
 
 Name:            xorg-x11-drv-nvidia-96xx
-Version:         96.43.11
-Release:         5%{?dist}
+Version:         96.43.13
+Release:         1%{?dist}
 Summary:         NVIDIA's 96xx series proprietary display driver for NVIDIA graphic cards
 
 Group:           User Interface/X Hardware Support
@@ -103,7 +103,7 @@ sh %{SOURCE1} --extract-only --target nvidiapkg-x64
 tar -cjf nvidia-kmod-data-%{version}.tar.bz2 nvidiapkg-*/LICENSE nvidiapkg-*/usr/src/
 
 # Tweak to have debuginfo - part 2/2
-%if "%fedora" > "7"
+%if 0%{?fedora} >= 7
 cp -p %{_prefix}/lib/rpm/find-debuginfo.sh .
 sed -i -e 's|strict=true|strict=false|' find-debuginfo.sh
 %endif
@@ -267,6 +267,9 @@ fi ||:
 
 
 %changelog
+* Mon Aug 31 2009 kwizart < kwizart at gmail.com > - 96.43.13-1
+- Update to 96.43.13 (beta)
+
 * Tue Jun  9 2009 kwizart < kwizart at gmail.com > - 96.43.11-5
 - F-11 version.
 
