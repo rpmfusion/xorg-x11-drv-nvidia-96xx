@@ -43,7 +43,7 @@ Requires(post):  nvidia-96xx-kmod >= %{version}
 
 # Needed in all nvidia or fglrx driver packages
 BuildRequires:   desktop-file-utils
-BuildRequires:   preload
+BuildRequires:   prelink
 Requires:        which
 Requires:        livna-config-display
 Requires:        %{name}-libs-%{_target_cpu} = %{version}-%{release}
