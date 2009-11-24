@@ -8,7 +8,7 @@
 
 Name:            xorg-x11-drv-nvidia-96xx
 Version:         96.43.13
-Release:         2%{?dist}
+Release:         3%{?dist}
 Summary:         NVIDIA's 96xx series proprietary display driver for NVIDIA graphic cards
 
 Group:           User Interface/X Hardware Support
@@ -30,7 +30,9 @@ Source92:        filter-provides.sh
 %define          __find_provides %{SOURCE92}
 
 BuildRoot:       %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-%if 0%{?fedora} >= 11
+%if 0%{?fedora} > 11 || 0%{?rhel} > 5
+ExclusiveArch: i686 x86_64
+%else 0%{?fedora} == 11
 ExclusiveArch: i586 x86_64
 %else
 ExclusiveArch: i386 x86_64
@@ -270,6 +272,9 @@ fi ||:
 
 
 %changelog
+* Tue Nov 24 2009 Nicolas Chauvet <kwizart@fedoraproject.org> - 96.43.14-3
+- Use nvidia-xconfig and nvidia-settings built from sources.
+
 * Sat Oct 10 2009 kwizart < kwizart at gmail.com > - 96.43.13-2
 - Avoid Requires/Provides of the libGL.so.1 . rfbz#859
 
