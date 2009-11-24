@@ -259,8 +259,7 @@ fi ||:
 %exclude %{_bindir}/nvidia-settings
 %exclude %{_sbindir}/nvidia-xconfig
 %{_bindir}/nvidia-bug-report.sh
-%{_bindir}/nvidia-smi
-%{_sbindir}/nvidia-config-display
+%{_sbindir}/nvidia-96xx-config-display
 # Xorg libs that do not need to be multilib
 %dir %{_libdir}/xorg/modules/extensions/nvidia
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
@@ -270,7 +269,6 @@ fi ||:
 %{_datadir}/pixmaps/*.png
 %exclude %{_mandir}/man1/nvidia-settings.*
 %exclude %{_mandir}/man1/nvidia-xconfig.*
-%{_mandir}/man1/nvidia-smi.*
 
 %files libs
 %defattr(-,root,root,-)
