@@ -8,7 +8,7 @@
 
 Name:            xorg-x11-drv-nvidia-96xx
 Version:         96.43.14
-Release:         1%{?dist}
+Release:         2%{?dist}
 Summary:         NVIDIA's 96xx series proprietary display driver for NVIDIA graphic cards
 
 Group:           User Interface/X Hardware Support
@@ -37,6 +37,8 @@ ExclusiveArch: i586 x86_64
 %else
 ExclusiveArch: i386 x86_64
 %endif
+Requires:  nvidia-xconfig
+Requires:  nvidia-settings
 
 Requires:        nvidia-96xx-kmod >= %{version}
 Requires(post):  nvidia-96xx-kmod >= %{version}
@@ -254,8 +256,11 @@ fi ||:
 %doc nvidiapkg/usr/share/doc/*
 %config(noreplace) %{_sysconfdir}/modprobe.d/blacklist-nouveau.conf
 %{_initrddir}/nvidia-96xx
-%{_bindir}/*
-%{_sbindir}/*
+%exclude %{_bindir}/nvidia-settings
+%exclude %{_sbindir}/nvidia-xconfig
+%{_bindir}/nvidia-bug-report.sh
+%{_bindir}/nvidia-smi
+%{_sbindir}/nvidia-config-display
 # Xorg libs that do not need to be multilib
 %dir %{_libdir}/xorg/modules/extensions/nvidia
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
@@ -263,7 +268,9 @@ fi ||:
 #/no_multilib
 %{_datadir}/applications/*nvidia-settings.desktop
 %{_datadir}/pixmaps/*.png
-%{_mandir}/man[1-9]/nvidia*.*
+%exclude %{_mandir}/man1/nvidia-settings.*
+%exclude %{_mandir}/man1/nvidia-xconfig.*
+%{_mandir}/man1/nvidia-smi.*
 
 %files libs
 %defattr(-,root,root,-)
@@ -283,6 +290,9 @@ fi ||:
 
 
 %changelog
+* Tue Nov 24 2009 Nicolas Chauvet <kwizart@fedoraproject.org> - 96.43.14-2
+- Use nvidia-xconfig and nvidia-settings built from sources.
+
 * Sat Nov 14 2009 Nicolas Chauvet <kwizart@fedoraproject.org> - 96.43.14-1
 - Update to 96.43.14
 - Update blacklist-nouveau.conf for F-12
