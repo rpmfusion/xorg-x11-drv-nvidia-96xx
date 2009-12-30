@@ -272,7 +272,7 @@ fi ||:
 
 
 %changelog
-* Tue Nov 24 2009 Nicolas Chauvet <kwizart@fedoraproject.org> - 96.43.14-3
+* Tue Nov 24 2009 Nicolas Chauvet <kwizart@fedoraproject.org> - 96.43.13-3
 - Use nvidia-xconfig and nvidia-settings built from sources.
 
 * Sat Oct 10 2009 kwizart < kwizart at gmail.com > - 96.43.13-2
