@@ -7,7 +7,7 @@
 %endif
 
 Name:            xorg-x11-drv-nvidia-96xx
-Version:         96.43.16
+Version:         96.43.18
 Release:         1%{?dist}
 Summary:         NVIDIA's 96xx series proprietary display driver for NVIDIA graphic cards
 
@@ -206,7 +206,7 @@ mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/ld.so.conf.d/
 echo "%{nvidialibdir}" > $RPM_BUILD_ROOT%{_sysconfdir}/ld.so.conf.d/nvidia-96xx-%{_lib}.conf
 
 # Remove execstack needs on F-12 and laters
-%if 0%{?fedora} >= 12 || 0%{?rhel} > 5
+%if 0
 find $RPM_BUILD_ROOT%{nvidialibdir} -name '*.so.*' -type f -exec execstack -c {} ';'
 execstack -c $RPM_BUILD_ROOT%{_libdir}/xorg/modules/extensions/nvidia/libglx.so.%{version}
 execstack -c $RPM_BUILD_ROOT%{_libdir}/xorg/modules/drivers/nvidia_drv.so
@@ -222,15 +222,23 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %post
-# Removes old legacy layout, fixed SELinux copy errors
-if [ ! $(ls /etc/udev/devices/nvidia* 2>/dev/null | wc -l) -eq 0 ];then rm -f /etc/udev/devices/nvidia*;fi ||:
 if [ "$1" -eq "1" ]; then
   # Enable nvidia driver when installing
   %{_sbindir}/nvidia-96xx-config-display enable &>/dev/null ||:
   # Add init script and start it
   /sbin/chkconfig --add nvidia-96xx ||:
   /etc/init.d/nvidia-96xx start &>/dev/null ||:
+  if [ -x /sbin/grubby ] ; then
+    GRUBBYLASTKERNEL=`/sbin/grubby --default-kernel`
+    /sbin/grubby --update-kernel=${GRUBBYLASTKERNEL} --args='nouveau.modeset=0 rdblacklist=nouveau' &>/dev/null
+  fi
 fi
+if [ -x /usr/sbin/setsebool ] ; then
+  SELINUXEXECSTACK=`cat /selinux/booleans/allow_execstack 2>/dev/null`
+  if [ "${SELINUXEXECSTACK}" == "0 0" ] ; then
+    /usr/sbin/setsebool -P allow_execstack on &>/dev/null
+  fi
+fi ||:
 
 %post libs -p /sbin/ldconfig
 
@@ -280,6 +288,12 @@ fi ||:
 
 
 %changelog
+* Sat Aug 14 2010 Nicolas Chauvet <kwizart@gmail.com> - 96.43.18-1
+- Update to 96.43.18
+- Fallback to nouveau instead of nv
+- Add post section to change boot option with grubby
+- Add post section Enabled Selinux allow_execstack boolean.
+
 * Sat Mar 27 2010 Nicolas Chauvet <kwizart@fedoraproject.org> - 96.43.16-1
 - Update to 96.43.16
 
