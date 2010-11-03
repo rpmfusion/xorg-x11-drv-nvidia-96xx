@@ -21,7 +21,7 @@ Source3:         nvidia-96xx-xorg.conf
 #Source5:         nvidia-96xx-init
 Source6:         blacklist-nouveau.conf
 #Source10:        nvidia-96xx-config-display
-#Source11:        nvidia-96xx-README.Fedora
+Source11:        nvidia-96xx-README.Fedora
 # So we don't pull other nvidia variants
 Source91:        filter-requires.sh
 # So we don't mess with mesa provides.
