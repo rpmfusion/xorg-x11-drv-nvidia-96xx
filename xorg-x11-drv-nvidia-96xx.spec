@@ -8,7 +8,7 @@
 
 Name:            xorg-x11-drv-nvidia-96xx
 Version:         96.43.19
-Release:         1%{?dist}
+Release:         2%{?dist}
 Summary:         NVIDIA's 96xx series proprietary display driver for NVIDIA graphic cards
 
 Group:           User Interface/X Hardware Support
@@ -16,9 +16,11 @@ License:         Redistributable, no modification permitted
 URL:             http://www.nvidia.com/
 Source0:         ftp://download.nvidia.com/XFree86/Linux-x86/%{version}/NVIDIA-Linux-x86-%{version}-pkg0.run
 Source1:         ftp://download.nvidia.com/XFree86/Linux-x86_64/%{version}/NVIDIA-Linux-x86_64-%{version}-pkg0.run
-Source5:         nvidia-96xx-init
+Source2:         00-nvidia.conf
+Source3:         nvidia-96xx-xorg.conf
+#Source5:         nvidia-96xx-init
 Source6:         blacklist-nouveau.conf
-Source10:        nvidia-96xx-config-display
+#Source10:        nvidia-96xx-config-display
 Source11:        nvidia-96xx-README.Fedora
 # So we don't pull other nvidia variants
 Source91:        filter-requires.sh
@@ -45,14 +47,18 @@ Requires(post):  nvidia-96xx-kmod >= %{version}
 # Needed in all nvidia or fglrx driver packages
 BuildRequires:   prelink
 Requires:        which
-Requires:        livna-config-display
+#Requires:        livna-config-display
+%if 0%{?fedora} > 10 || 0%{?rhel} > 5
+Requires:        %{name}-libs%{_isa} = %{?epoch}:%{version}-%{release}
+%else
 Requires:        %{name}-libs-%{_target_cpu} = %{version}-%{release}
+%endif
 
-Requires(post):  livna-config-display
-Requires(preun): livna-config-display
-Requires(post):  chkconfig
+#Requires(post):  livna-config-display
+#Requires(preun): livna-config-display
+#Requires(post):  chkconfig
 Requires(post):  ldconfig
-Requires(preun): chkconfig
+#Requires(preun): chkconfig
 
 Provides:        nvidia-96xx-kmod-common = %{version}
 
@@ -82,7 +88,11 @@ for driver version %{version}.
 %package devel
 Summary:         Development files for %{name}
 Group:           Development/Libraries
+%if 0%{?fedora} > 10 || 0%{?rhel} > 5
+Requires:        %{name}-libs%{_isa} = %{?epoch}:%{version}-%{release}
+%else
 Requires:        %{name}-libs-%{_target_cpu} = %{version}-%{release}
+%endif
 
 %description devel
 This package provides the development files of the %{name} package,
@@ -192,10 +202,10 @@ ln -s libXvMCNVIDIA.so.%{version} $RPM_BUILD_ROOT%{nvidialibdir}/libXvMCNVIDIA_d
 ln -s libglx.so.%{version} $RPM_BUILD_ROOT%{_libdir}/xorg/modules/extensions/nvidia/libglx.so
 
 # X configuration script
-install -D -p -m 0755 %{SOURCE10} $RPM_BUILD_ROOT%{_sbindir}/nvidia-96xx-config-display
+#install -D -p -m 0755 %{SOURCE10} $RPM_BUILD_ROOT%{_sbindir}/nvidia-96xx-config-display
 
 # Install initscript
-install -D -p -m 0755 %{SOURCE5} $RPM_BUILD_ROOT%{_initrddir}/nvidia-96xx
+#install -D -p -m 0755 %{SOURCE5} $RPM_BUILD_ROOT%{_initrddir}/nvidia-96xx
 
 #Blacklist nouveau by F-11
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/modprobe.d/
@@ -216,6 +226,13 @@ execstack -c $RPM_BUILD_ROOT%{_sbindir}/nvidia-xconfig
 %endif
 %endif
 
+#Install static driver dependant configuration files
+mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/X11/xorg.conf.d
+install -pm 0644 %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/X11/xorg.conf.d
+sed -i -e 's|@LIBDIR@|%{_libdir}|g' $RPM_BUILD_ROOT%{_sysconfdir}/X11/xorg.conf.d/00-nvidia.conf
+touch -r %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/X11/xorg.conf.d/00-nvidia.conf
+install -pm 0644 %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/X11/
+
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -224,15 +241,15 @@ rm -rf $RPM_BUILD_ROOT
 %post
 if [ "$1" -eq "1" ]; then
   # Enable nvidia driver when installing
-  %{_sbindir}/nvidia-96xx-config-display enable &>/dev/null ||:
+  #%{_sbindir}/nvidia-96xx-config-display enable &>/dev/null ||:
   # Add init script and start it
-  /sbin/chkconfig --add nvidia-96xx ||:
-  /etc/init.d/nvidia-96xx start &>/dev/null ||:
+  #/sbin/chkconfig --add nvidia-96xx ||:
+  #/etc/init.d/nvidia-96xx start &>/dev/null ||:
   if [ -x /sbin/grubby ] ; then
     GRUBBYLASTKERNEL=`/sbin/grubby --default-kernel`
     /sbin/grubby --update-kernel=${GRUBBYLASTKERNEL} --args='nouveau.modeset=0 rdblacklist=nouveau' &>/dev/null
   fi
-fi
+fi || :
 if [ -x /usr/sbin/setsebool ] ; then
   SELINUXEXECSTACK=`cat /selinux/booleans/allow_execstack 2>/dev/null`
   if [ "${SELINUXEXECSTACK}" == "0 0" ] ; then
@@ -246,8 +263,8 @@ fi ||:
 if [ "$1" -eq "0" ]; then
     # Disable driver on final removal
     test -f %{_sbindir}/nvidia-96xx-config-display && %{_sbindir}/nvidia-96xx-config-display disable &>/dev/null ||:
-    %{_initrddir}/nvidia-96xx stop &>/dev/null ||:
-    /sbin/chkconfig --del nvidia-96xx ||:
+    #%{_initrddir}/nvidia-96xx stop &>/dev/null ||:
+    #/sbin/chkconfig --del nvidia-96xx ||:
 fi ||:
 
 %postun libs -p /sbin/ldconfig
@@ -255,12 +272,14 @@ fi ||:
 %files
 %defattr(-,root,root,-)
 %doc nvidiapkg/usr/share/doc/*
+%config %{_sysconfdir}/X11/xorg.conf.d/00-nvidia.conf
 %config(noreplace) %{_sysconfdir}/modprobe.d/blacklist-nouveau.conf
-%{_initrddir}/nvidia-96xx
+%config(noreplace) %{_sysconfdir}/X11/nvidia-96xx-xorg.conf
+#{_initrddir}/nvidia-96xx
 %exclude %{_bindir}/nvidia-settings
 %exclude %{_sbindir}/nvidia-xconfig
 %{_bindir}/nvidia-bug-report.sh
-%{_sbindir}/nvidia-96xx-config-display
+#{_sbindir}/nvidia-96xx-config-display
 # Xorg libs that do not need to be multilib
 %dir %{_libdir}/xorg/modules/extensions/nvidia
 %{_libdir}/xorg/modules/drivers/nvidia_drv.so
@@ -288,8 +307,13 @@ fi ||:
 
 
 %changelog
-* Wed Nov 03 2010 Nicolas Chauvet <kwizart@gmail.com> - 96.43.19-1
+* Wed Nov 03 2010 Nicolas Chauvet <kwizart@gmail.com> - 96.43.19-2
 - Update to 96.43.19
+- Avoid using livna-config-display on fedora 14 and later
+  because of rhbz#623742
+- Use static workaround
+- Explicitely use %%{_isa} dependency from -devel to -libs
+- Improve uninstallation script rfbz#1398
 
 * Sat Aug 14 2010 Nicolas Chauvet <kwizart@gmail.com> - 96.43.18-1
 - Update to 96.43.18
