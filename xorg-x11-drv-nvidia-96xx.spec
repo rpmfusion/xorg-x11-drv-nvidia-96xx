@@ -8,7 +8,7 @@
 
 Name:            xorg-x11-drv-nvidia-96xx
 Version:         96.43.19
-Release:         1%{?dist}
+Release:         2%{?dist}
 Summary:         NVIDIA's 96xx series proprietary display driver for NVIDIA graphic cards
 
 Group:           User Interface/X Hardware Support
@@ -46,7 +46,11 @@ Requires(post):  nvidia-96xx-kmod >= %{version}
 BuildRequires:   prelink
 Requires:        which
 Requires:        livna-config-display
+%if 0%{?fedora} > 10 || 0%{?rhel} > 5
+Requires:        %{name}-libs%{_isa} = %{?epoch}:%{version}-%{release}
+%else
 Requires:        %{name}-libs-%{_target_cpu} = %{version}-%{release}
+%endif
 
 Requires(post):  livna-config-display
 Requires(preun): livna-config-display
@@ -82,7 +86,11 @@ for driver version %{version}.
 %package devel
 Summary:         Development files for %{name}
 Group:           Development/Libraries
+%if 0%{?fedora} > 10 || 0%{?rhel} > 5
+Requires:        %{name}-libs%{_isa} = %{?epoch}:%{version}-%{release}
+%else
 Requires:        %{name}-libs-%{_target_cpu} = %{version}-%{release}
+%endif
 
 %description devel
 This package provides the development files of the %{name} package,
@@ -216,6 +224,13 @@ execstack -c $RPM_BUILD_ROOT%{_sbindir}/nvidia-xconfig
 %endif
 %endif
 
+#Install static driver dependant configuration files
+mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/X11/xorg.conf.d
+install -pm 0644 %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/X11/xorg.conf.d
+sed -i -e 's|@LIBDIR@|%{_libdir}|g' $RPM_BUILD_ROOT%{_sysconfdir}/X11/xorg.conf.d/00-nvidia.conf
+touch -r %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/X11/xorg.conf.d/00-nvidia.conf
+install -pm 0644 %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/X11/
+
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -232,7 +247,7 @@ if [ "$1" -eq "1" ]; then
     GRUBBYLASTKERNEL=`/sbin/grubby --default-kernel`
     /sbin/grubby --update-kernel=${GRUBBYLASTKERNEL} --args='nouveau.modeset=0 rdblacklist=nouveau' &>/dev/null
   fi
-fi
+fi || :
 if [ -x /usr/sbin/setsebool ] ; then
   SELINUXEXECSTACK=`cat /selinux/booleans/allow_execstack 2>/dev/null`
   if [ "${SELINUXEXECSTACK}" == "0 0" ] ; then
@@ -248,6 +263,17 @@ if [ "$1" -eq "0" ]; then
     test -f %{_sbindir}/nvidia-96xx-config-display && %{_sbindir}/nvidia-96xx-config-display disable &>/dev/null ||:
     %{_initrddir}/nvidia-96xx stop &>/dev/null ||:
     /sbin/chkconfig --del nvidia-96xx ||:
+    #Clear grub option to disable nouveau for all kernels
+    if [ -x /sbin/grubby ] ; then
+      KERNELS=`ls /boot/vmlinuz-*%{?dist}.$(uname -m)`
+      for kernel in ${KERNELS} ; do
+      /sbin/grubby --update-kernel=${kernel} \
+        --remove-args='nouveau.modeset=0 rdblacklist=nouveau nomodeset' &>/dev/null
+      done
+    fi
+    #Backup and disable previously used xorg.conf
+    [ -f %{_sysconfdir}/X11/xorg.conf ] && \
+      mv  %{_sysconfdir}/X11/xorg.conf %{_sysconfdir}/X11/xorg.conf.%{name}_uninstalled &>/dev/null
 fi ||:
 
 %postun libs -p /sbin/ldconfig
@@ -288,8 +314,10 @@ fi ||:
 
 
 %changelog
-* Wed Nov 03 2010 Nicolas Chauvet <kwizart@gmail.com> - 96.43.19-1
+* Wed Nov 03 2010 Nicolas Chauvet <kwizart@gmail.com> - 96.43.19-2
 - Update to 96.43.19
+- Explicitely use %%{_isa} dependency from -devel to -libs
+- Improve uninstallation script rfbz#1398
 
 * Sat Aug 14 2010 Nicolas Chauvet <kwizart@gmail.com> - 96.43.18-1
 - Update to 96.43.18
