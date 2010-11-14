@@ -8,7 +8,7 @@
 
 Name:            xorg-x11-drv-nvidia-96xx
 Version:         96.43.19
-Release:         2%{?dist}
+Release:         3%{?dist}
 Summary:         NVIDIA's 96xx series proprietary display driver for NVIDIA graphic cards
 
 Group:           User Interface/X Hardware Support
@@ -259,6 +259,10 @@ fi ||:
 
 %post libs -p /sbin/ldconfig
 
+%posttrans
+ [ -f %{_sysconfdir}/X11/xorg.conf ] || \
+   cp -p %{_sysconfdir}/X11/nvidia-96xx-xorg.conf %{_sysconfdir}/X11/xorg.conf || :
+
 %preun
 if [ "$1" -eq "0" ]; then
     # Disable driver on final removal
@@ -307,6 +311,9 @@ fi ||:
 
 
 %changelog
+* Sun Nov 14 2010 Nicolas Chauvet <kwizart@gmail.com> - 96.43.19-3
+- Add missing %%posttrans script.
+
 * Wed Nov 03 2010 Nicolas Chauvet <kwizart@gmail.com> - 96.43.19-2
 - Update to 96.43.19
 - Avoid using livna-config-display on fedora 14 and later
