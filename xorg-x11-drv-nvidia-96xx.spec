@@ -8,7 +8,7 @@
 
 Name:            xorg-x11-drv-nvidia-96xx
 Version:         96.43.19
-Release:         3%{?dist}
+Release:         4%{?dist}
 Summary:         NVIDIA's 96xx series proprietary display driver for NVIDIA graphic cards
 
 Group:           User Interface/X Hardware Support
@@ -266,9 +266,20 @@ fi ||:
 %preun
 if [ "$1" -eq "0" ]; then
     # Disable driver on final removal
-    test -f %{_sbindir}/nvidia-96xx-config-display && %{_sbindir}/nvidia-96xx-config-display disable &>/dev/null ||:
-    #%{_initrddir}/nvidia-96xx stop &>/dev/null ||:
-    #/sbin/chkconfig --del nvidia-96xx ||:
+    #test -f %{_sbindir}/nvidia-96xx-config-display && %{_sbindir}/nvidia-96xx-config-display disable &>/dev/null
+    #%{_initrddir}/nvidia-96xx stop &>/dev/null
+    #/sbin/chkconfig --del nvidia-96xx &>/dev/null
+    #Clear grub option to disable nouveau for all kernels
+    if [ -x /sbin/grubby ] ; then
+      KERNELS=`ls /boot/vmlinuz-*%{?dist}.$(uname -m)*`
+      for kernel in ${KERNELS} ; do
+      /sbin/grubby --update-kernel=${kernel} \
+        --remove-args='nouveau.modeset=0 rdblacklist=nouveau nomodeset' &>/dev/null
+      done
+    fi
+    #Backup and disable previously used xorg.conf
+    [ -f %{_sysconfdir}/X11/xorg.conf ] && \
+      mv  %{_sysconfdir}/X11/xorg.conf %{_sysconfdir}/X11/xorg.conf.%{name}_uninstalled &>/dev/null
 fi ||:
 
 %postun libs -p /sbin/ldconfig
@@ -311,6 +322,9 @@ fi ||:
 
 
 %changelog
+* Fri Dec 17 2010 Nicolas Chauvet <kwizart@gmail.com> - 96.43.19-4
+- Add uninstall support
+
 * Sun Nov 14 2010 Nicolas Chauvet <kwizart@gmail.com> - 96.43.19-3
 - Add missing %%posttrans script.
 
