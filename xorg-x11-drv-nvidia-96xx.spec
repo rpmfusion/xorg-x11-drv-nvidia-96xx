@@ -86,6 +86,8 @@ GeForce 8 and above are NOT supported by this release.
 For the full product support list, please consult the release notes
 for driver version %{version}.
 
+Please use the following documentation:
+http://rpmfusion.org/Howto/nVidia
 
 %package devel
 Summary:         Development files for %{name}
@@ -322,6 +324,8 @@ fi ||:
 - Rebase with main serie packaging improvements
 - add changes for grub2
 - Fix %%post when grubby --default-kernel is broken
+- Workaround grub2 fb initialization at install time - rfbz#2391
+- Reference our own documentation of the driver.
 
 * Fri Dec 17 2010 Nicolas Chauvet <kwizart@gmail.com> - 96.43.19-4
 - Add uninstall support
