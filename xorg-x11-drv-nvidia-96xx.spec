@@ -5,7 +5,7 @@
 
 Name:            xorg-x11-drv-nvidia-96xx
 Version:         96.43.23
-Release:         1%{?dist}
+Release:         2%{?dist}
 Summary:         NVIDIA's 96xx series proprietary display driver for NVIDIA graphic cards
 
 Group:           User Interface/X Hardware Support
@@ -17,6 +17,7 @@ Source2:         00-nvidia.conf
 Source3:         nvidia-96xx-xorg.conf
 Source6:         blacklist-nouveau.conf
 Source11:        nvidia-96xx-README.Fedora
+Source99:        nvidia-settings.desktop
 
 BuildRoot:       %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %if 0%{?fedora} > 11 || 0%{?rhel} > 5
@@ -26,14 +27,15 @@ ExclusiveArch: i586 x86_64
 %else
 ExclusiveArch: i386 x86_64
 %endif
-Requires:  nvidia-xconfig
-Requires:  nvidia-settings
+#Requires:  nvidia-xconfig
+#Requires:  nvidia-settings
 
 Requires:        nvidia-96xx-kmod >= %{version}
 Requires(post):  nvidia-96xx-kmod >= %{version}
 
 # Needed in all nvidia or fglrx driver packages
 BuildRequires:   prelink
+BuildRequires:   desktop-file-utils
 Requires:        which
 #Requires:        livna-config-display
 %if 0%{?fedora} > 10 || 0%{?rhel} > 5
@@ -65,12 +67,12 @@ Provides:        nvidia-x11-drv-96xx = %{version}-%{release}
 
 %{?filter_setup:
 %filter_from_provides /^libnvidia/d;
-%filter_from_provides /^libGLCore\.so/d;
+%filter_from_provides /^libGLcore\.so/d;
 %filter_from_provides /^libGL\.so/d;
 %filter_from_provides /^libXvMCNVIDIA_dynamic\.so\.1/d;
 %filter_from_provides /^libglx\.so/d;
 %filter_from_requires /^libnvidia/d;
-%filter_from_requires /^libGLCore\.so/d;
+%filter_from_requires /^libGLcore\.so/d;
 %filter_from_requires /^libGL\.so/d;
 %filter_from_requires /^libXvMCNVIDIA_dynamic\.so\.1/d;
 %filter_from_requires /^libglx\.so/d;
@@ -231,6 +233,13 @@ sed -i -e 's|@LIBDIR@|%{_libdir}|g' $RPM_BUILD_ROOT%{_sysconfdir}/X11/xorg.conf.
 touch -r %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/X11/xorg.conf.d/00-nvidia.conf
 install -pm 0644 %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/X11/
 
+#Restore desktop file
+mkdir -p $RPM_BUILD_ROOT%{_datadir}/applications
+desktop-file-install --vendor ""                        \
+        --dir $RPM_BUILD_ROOT%{_datadir}/applications   \
+        --mode 644                                      \
+       %{SOURCE99}
+
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -288,9 +297,10 @@ fi ||:
 %config(noreplace) %{_sysconfdir}/modprobe.d/blacklist-nouveau.conf
 %config(noreplace) %{_sysconfdir}/X11/nvidia-96xx-xorg.conf
 #{_initrddir}/nvidia-96xx
-%exclude %{_bindir}/nvidia-settings
-%exclude %{_sbindir}/nvidia-xconfig
+%{_bindir}/nvidia-settings
+%{_sbindir}/nvidia-xconfig
 %{_bindir}/nvidia-bug-report.sh
+%{_datadir}/applications/*.desktop
 #{_sbindir}/nvidia-96xx-config-display
 # Xorg libs that do not need to be multilib
 %dir %{_libdir}/xorg/modules/extensions/nvidia
@@ -298,8 +308,8 @@ fi ||:
 %{_libdir}/xorg/modules/extensions/nvidia/*.so*
 #/no_multilib
 %{_datadir}/pixmaps/*.png
-%exclude %{_mandir}/man1/nvidia-settings.*
-%exclude %{_mandir}/man1/nvidia-xconfig.*
+%{_mandir}/man1/nvidia-settings.*
+%{_mandir}/man1/nvidia-xconfig.*
 
 %files libs
 %defattr(-,root,root,-)
@@ -319,6 +329,11 @@ fi ||:
 
 
 %changelog
+* Sun Jul 21 2013 Nicolas Chauvet <kwizart@gmail.com> - 96.43.23-2
+- Avoid Obsoletes until rhbz#985944
+- Restore destop file
+- Fix typo with libGLcore filter
+
 * Sat Sep 15 2012 Leigh Scott <leigh123linux@googlemail.com> - 96.43.23-1
 - Update to 96.43.23
 - Rebase with main serie packaging improvements
